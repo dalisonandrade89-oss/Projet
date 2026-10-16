@@ -1,0 +1,4 @@
+<resources>
+    <!-- Tema base da janela; o visual real vem do Compose (Material 3 + Dynamic Color) -->
+    <style name="Theme.Projet" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>
