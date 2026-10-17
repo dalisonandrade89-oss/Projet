@@ -1,6 +1,6 @@
 # 🚀 Projet
 
-![Build](https://github.com/SEU_USUARIO/projet/actions/workflows/build_and_release.yml/badge.svg)
+![Build](https://github.com/dalisonandrade89-oss/projet/actions/workflows/build_and_release.yml/badge.svg)
 ![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.0-7F52FF?logo=kotlin&logoColor=white)
 ![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=jetpackcompose&logoColor=white)
@@ -37,7 +37,7 @@ com.projet.app
    `gradle wrapper --gradle-version 8.9` e faça commit de `gradlew`, `gradlew.bat` e `gradle/wrapper/`.
    (O workflow do CI não depende disso.)
 3. **Licença:** o `LICENSE` já contém o texto integral da GPL 3.0 (adicione seu nome nos cabeçalhos dos arquivos, se quiser).
-4. Em `gradle.properties`, ajuste `githubRepo=SEU_USUARIO/projet` (e os badges acima).
+4. O repositório já está configurado como `dalisonandrade89-oss/projet` (em `gradle.properties` e nos badges). Se usar outro nome de repositório, altere nesses dois lugares.
 5. Suba para o GitHub. Cada push em `main` gera um APK debug (aba *Actions → Artifacts*).
 
 ### Google Drive (sincronização)
