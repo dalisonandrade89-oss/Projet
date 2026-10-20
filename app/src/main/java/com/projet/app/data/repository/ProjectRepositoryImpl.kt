@@ -1,10 +1,13 @@
 package com.projet.app.data.repository
 
 import com.projet.app.data.local.ProjectDao
-import com.projet.app.data.local.StepEntity
 import com.projet.app.data.local.ProjectEntity
+import com.projet.app.data.local.StepEntity
 import com.projet.app.data.local.toDomain
+import com.projet.app.data.local.toTrashItem
 import com.projet.app.domain.model.Project
+import com.projet.app.domain.model.TrashItem
+import com.projet.app.domain.model.TrashPolicy
 import com.projet.app.domain.repository.ProjectRepository
 import com.projet.app.work.SyncScheduler
 import kotlinx.coroutines.CoroutineScope
@@ -13,6 +16,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import java.util.concurrent.ConcurrentHashMap
@@ -24,6 +28,9 @@ import java.util.concurrent.ConcurrentHashMap
  * edição cancela a gravação pendente e reinicia o timer; após [DEBOUNCE_MS] sem digitação,
  * grava. O escopo é do app (não da tela), então a gravação sobrevive ao fechamento da tela.
  * Toda gravação incrementa `version`/`updatedAt` e agenda um sync em segundo plano.
+ *
+ * Lixeira: excluir = soft delete (tombstone). Restaurar desfaz o tombstone com `version`/`updatedAt`
+ * novos, então a restauração também vence no merge entre aparelhos.
  */
 class ProjectRepositoryImpl(
     private val dao: ProjectDao,
@@ -57,11 +64,18 @@ class ProjectRepositoryImpl(
         syncScheduler.schedule()
     }
 
+    /**
+     * Uma única leitura + um único `upsertProjects` (o Room executa o upsert de lista numa
+     * transação): a UI não "pisca" com estados intermediários e o app morrer no meio não deixa
+     * a ordem pela metade.
+     */
     override suspend fun reorderProjects(orderedIds: List<String>) {
-        orderedIds.forEachIndexed { index, id ->
-            val current = dao.getProject(id) ?: return@forEachIndexed
-            if (current.position != index) dao.upsertProject(current.touch(position = index))
+        val byId = dao.getAllProjectsRaw().associateBy { it.id }
+        val changed = orderedIds.mapIndexedNotNull { index, id ->
+            byId[id]?.takeIf { it.position != index }?.touch(position = index)
         }
+        if (changed.isEmpty()) return
+        dao.upsertProjects(changed)
         syncScheduler.schedule()
     }
 
@@ -112,6 +126,43 @@ class ProjectRepositoryImpl(
                 current.copy(title = title, version = current.version + 1, updatedAt = System.currentTimeMillis())
             )
         }
+    }
+
+    // ---------------------------------------------------------------- Lixeira
+
+    override fun observeTrash(): Flow<List<TrashItem>> = combine(
+        dao.observeDeletedProjects(),
+        dao.observeDeletedSteps()
+    ) { projects, steps ->
+        val items: List<TrashItem> = projects.map { it.toTrashItem() } + steps.map { it.toTrashItem() }
+        items.sortedByDescending { it.deletedAt }
+    }
+
+    /** O projeto volta para o fim da lista (posição nova), com os passos que tinha. */
+    override suspend fun restoreProject(id: String) {
+        val current = dao.getProject(id) ?: return
+        if (!current.isDeleted) return
+        dao.upsertProject(current.touch(isDeleted = false, position = dao.maxProjectPosition() + 1))
+        syncScheduler.schedule()
+    }
+
+    /** O passo volta para o fim da lista de passos do projeto. */
+    override suspend fun restoreStep(stepId: String) {
+        val current = dao.getStep(stepId) ?: return
+        if (!current.isDeleted) return
+        dao.upsertStep(
+            current.copy(
+                isDeleted = false,
+                position = dao.maxStepPosition(current.projectId) + 1,
+                version = current.version + 1,
+                updatedAt = System.currentTimeMillis()
+            )
+        )
+        syncScheduler.schedule()
+    }
+
+    override suspend fun purgeExpiredTrash() {
+        dao.purgeTrash(TrashPolicy.cutoff())
     }
 
     // ---------------------------------------------------------------- helpers

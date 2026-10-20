@@ -3,6 +3,7 @@ package com.projet.app.update
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.provider.Settings
 import androidx.core.content.FileProvider
 import com.projet.app.BuildConfig
@@ -108,9 +109,15 @@ class AppUpdaterService(
     /**
      * Abre o instalador. Retorna `false` se o usuário ainda precisa liberar
      * "instalar apps desconhecidos" para o Projet (a tela de ajustes é aberta).
+     *
+     * `canRequestPackageInstalls()` e `ACTION_MANAGE_UNKNOWN_APP_SOURCES` só existem a partir do
+     * Android 8 (API 26). No Android 7.x (API 24–25, nosso minSdk) a permissão é um toggle global
+     * "Fontes desconhecidas" e o instalador do sistema já orienta o usuário se estiver desligado.
      */
     fun install(apk: File): Boolean {
-        if (!context.packageManager.canRequestPackageInstalls()) {
+        val canInstall = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ||
+            context.packageManager.canRequestPackageInstalls()
+        if (!canInstall) {
             context.startActivity(
                 Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, Uri.parse("package:${context.packageName}"))
                     .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)

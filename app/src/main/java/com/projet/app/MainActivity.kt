@@ -13,6 +13,7 @@ import androidx.navigation.navArgument
 import com.projet.app.ui.detail.ProjectDetailScreen
 import com.projet.app.ui.list.ProjectListScreen
 import com.projet.app.ui.theme.ProjetTheme
+import com.projet.app.ui.trash.TrashScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -27,7 +28,10 @@ private fun ProjetNavHost() {
     val nav = rememberNavController()
     NavHost(navController = nav, startDestination = "list") {
         composable("list") {
-            ProjectListScreen(onOpenProject = { id -> nav.navigate("detail/$id") })
+            ProjectListScreen(
+                onOpenProject = { id -> nav.navigate("detail/$id") },
+                onOpenTrash = { nav.navigate("trash") }
+            )
         }
         composable(
             route = "detail/{id}",
@@ -35,6 +39,9 @@ private fun ProjetNavHost() {
         ) { entry ->
             val id = entry.arguments?.getString("id") ?: return@composable
             ProjectDetailScreen(projectId = id, onBack = { nav.popBackStack() })
+        }
+        composable("trash") {
+            TrashScreen(onBack = { nav.popBackStack() })
         }
     }
 }

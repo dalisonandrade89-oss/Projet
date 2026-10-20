@@ -30,7 +30,11 @@ data class Project(
 
     val progressPercent: Int get() = (progress * 100f).roundToInt()
 
-    /** Pendentes primeiro (na ordem manual); concluídos vão para o fim da fila. */
+    /**
+     * Pendentes primeiro (na ordem manual); concluídos vão para o fim da fila.
+     * O `id` desempata posições iguais (dois aparelhos criando passos offline), mantendo a
+     * ordem estável entre emissões do Room.
+     */
     val orderedSteps: List<Step>
-        get() = steps.sortedWith(compareBy<Step>({ it.isCompleted }, { it.position }))
+        get() = steps.sortedWith(compareBy<Step>({ it.isCompleted }, { it.position }, { it.id }))
 }

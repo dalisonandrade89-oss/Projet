@@ -9,6 +9,7 @@ import com.projet.app.data.repository.SyncRepository
 import com.projet.app.domain.repository.ProjectRepository
 import com.projet.app.ui.detail.ProjectDetailViewModel
 import com.projet.app.ui.list.ProjectListViewModel
+import com.projet.app.ui.trash.TrashViewModel
 import com.projet.app.update.AppUpdaterService
 import com.projet.app.work.SyncScheduler
 import okhttp3.OkHttpClient
@@ -37,4 +38,5 @@ val appModule = module {
     // ViewModels
     viewModel { ProjectListViewModel(get(), get(), get()) }
     viewModel { (projectId: String) -> ProjectDetailViewModel(projectId, get()) }
+    viewModel { TrashViewModel(get()) }
 }

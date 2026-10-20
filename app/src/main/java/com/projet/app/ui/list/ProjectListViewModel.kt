@@ -33,6 +33,9 @@ data class ProjectListUiState(
     val update: UpdateUi = UpdateUi()
 )
 
+/** Ordem manual estável: posição e, em empate (aparelhos offline), id. */
+private val manualOrder = compareBy<Project>({ it.position }, { it.id })
+
 class ProjectListViewModel(
     private val repository: ProjectRepository,
     private val syncRepository: SyncRepository,
@@ -55,12 +58,15 @@ class ProjectListViewModel(
         repository.observeProjects(), sort, category, syncing, updateUi
     ) { projects, sortOption, selectedCategory, isSyncing, update ->
         val categories = projects.map { it.category }.filter { it.isNotBlank() }.distinct().sorted()
-        val filtered = selectedCategory?.let { c -> projects.filter { it.category == c } } ?: projects
+        // Se a categoria filtrada deixou de existir (renomeada/excluída), volta para "Todas"
+        // em vez de mostrar uma lista vazia sem nenhum chip selecionado.
+        val activeCategory = selectedCategory?.takeIf { it in categories }
+        val filtered = activeCategory?.let { c -> projects.filter { it.category == c } } ?: projects
         ProjectListUiState(
             projects = applySort(filtered, sortOption),
             sort = sortOption,
             categories = categories,
-            selectedCategory = selectedCategory,
+            selectedCategory = activeCategory,
             isSyncing = isSyncing,
             update = update
         )
@@ -68,10 +74,11 @@ class ProjectListViewModel(
 
     init {
         checkForUpdate()
+        purgeTrash()
     }
 
     private fun applySort(list: List<Project>, option: SortOption): List<Project> = when (option) {
-        SortOption.MANUAL -> list.sortedBy { it.position }
+        SortOption.MANUAL -> list.sortedWith(manualOrder)
         SortOption.NAME_ASC -> list.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name })
         SortOption.NAME_DESC -> list.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.name }).reversed()
         SortOption.CATEGORY -> list.sortedWith(
@@ -93,7 +100,7 @@ class ProjectListViewModel(
     /** Reordenação manual: troca o projeto com o vizinho (delta = -1 sobe, +1 desce). */
     fun moveProject(id: String, delta: Int) {
         viewModelScope.launch {
-            val ordered = repository.observeProjects().first().sortedBy { it.position }.map { it.id }.toMutableList()
+            val ordered = repository.observeProjects().first().sortedWith(manualOrder).map { it.id }.toMutableList()
             val from = ordered.indexOf(id)
             val to = from + delta
             if (from < 0 || to !in ordered.indices) return@launch
@@ -116,6 +123,12 @@ class ProjectListViewModel(
                 syncing.value = false
             }
         }
+    }
+
+    // ------------------------------------------------------------ lixeira
+    /** Apaga de vez o que passou de 30 dias na Lixeira (funciona mesmo sem Drive/consentimento). */
+    private fun purgeTrash() {
+        viewModelScope.launch { repository.purgeExpiredTrash() }
     }
 
     // ------------------------------------------------------------ auto-update

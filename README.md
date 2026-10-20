@@ -16,6 +16,7 @@ progresso em tempo real, auto-save e backup/sincronização no Google Drive.
 - Ordenação por nome (A-Z/Z-A), categoria, progresso (0-100%/100-0%) e posição manual; filtro por categoria.
 - Offline-first (Room) + sincronização incremental com o Google Drive (`appDataFolder`), Last-Write-Wins por `updatedAt`.
 - Auto-update in-app a partir das Releases do GitHub.
+- **Lixeira de 30 dias**: projetos e passos excluídos podem ser restaurados; depois disso são apagados definitivamente.
 
 ## 🧱 Stack
 Kotlin · Jetpack Compose + Material 3 (Dynamic Color) · Clean Architecture + MVVM · Koin ·
@@ -25,7 +26,7 @@ Room + Flow · WorkManager · Drive REST v3 (OkHttp) · kotlinx.serialization ·
 com.projet.app
 ├── data/{local,remote,repository}   # Room, Drive, SyncRepository, ProjectRepositoryImpl
 ├── domain/{model,repository}        # Project, Step, ProjectRepository
-├── ui/{list,detail,components,theme}
+├── ui/{list,detail,trash,components,theme}
 ├── work/                            # SyncWorker, SyncScheduler
 ├── update/                          # AppUpdaterService
 └── di/                              # módulo Koin
@@ -60,6 +61,11 @@ git tag v1.0.0 && git push origin v1.0.0
 ```
 O workflow compila o APK assinado e cria a Release `Projet-v1.0.0.apk`. O app checa `releases/latest`
 ao abrir e oferece a atualização.
+
+## 🔖 Versionamento
+Segue [SemVer](https://semver.org/lang/pt-BR/). A versão vive em `gradle.properties` (`versionName`/`versionCode`),
+o histórico em [CHANGELOG.md](CHANGELOG.md) e a política (quando subir PATCH/MINOR/MAJOR, versão do Room e do backup)
+está no fim do changelog. No CI de release a versão vem da tag (`v1.1.0`).
 
 ## 📄 Licença
 GPL-3.0 — veja [LICENSE](LICENSE).

@@ -16,6 +16,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.AlertDialog
@@ -43,8 +44,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.projet.app.R
 import com.projet.app.domain.model.SortOption
 import com.projet.app.ui.components.ProjectCard
 import com.projet.app.ui.components.UpdateAvailableDialog
@@ -54,6 +57,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun ProjectListScreen(
     onOpenProject: (String) -> Unit,
+    onOpenTrash: () -> Unit,
     viewModel: ProjectListViewModel = koinViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
@@ -79,6 +83,9 @@ fun ProjectListScreen(
                     IconButton(onClick = viewModel::syncNow, enabled = !state.isSyncing) {
                         if (state.isSyncing) CircularProgressIndicator(Modifier.size(20.dp), strokeWidth = 2.dp)
                         else Icon(Icons.Default.Refresh, contentDescription = "Sincronizar")
+                    }
+                    IconButton(onClick = onOpenTrash) {
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(R.string.trash_title))
                     }
                     Box {
                         IconButton(onClick = { showSortMenu = true }) {

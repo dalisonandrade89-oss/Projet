@@ -6,6 +6,7 @@ import com.projet.app.data.remote.AuthState
 import com.projet.app.data.remote.BackupFile
 import com.projet.app.data.remote.DriveAuthManager
 import com.projet.app.data.remote.GoogleDriveService
+import com.projet.app.domain.model.TrashPolicy
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Mutex
@@ -21,10 +22,14 @@ sealed interface SyncResult {
 /**
  * Sincronização offline-first: o Room é a fonte da verdade; o Drive é um espelho.
  *
- * Fluxo: baixa o JSON remoto → faz merge com o banco local (Last-Write-Wins por `updatedAt`,
- * desempate por `version`, depois prefere o local) → grava no Room o que veio do remoto →
+ * Fluxo: limpa a Lixeira local vencida → baixa o JSON remoto → faz merge com o banco local
+ * (Last-Write-Wins por `updatedAt`, desempate por `version`, depois prefere o local) → descarta
+ * tombstones vencidos (> [TrashPolicy.RETENTION_DAYS] dias) → grava no Room o que veio do remoto →
  * envia ao Drive apenas se o resultado difere do que já está lá (sync incremental).
  * Exclusões são tombstones (`isDeleted = true`), então também propagam.
+ *
+ * Trade-off conhecido: se um aparelho ficar offline por mais que o prazo da Lixeira com um
+ * registro ativo que outro aparelho excluiu e já purgou, o registro "ressuscita" no próximo sync.
  */
 class SyncRepository(
     private val dao: ProjectDao,
@@ -52,17 +57,22 @@ class SyncRepository(
     }
 
     private suspend fun runSync(token: String) {
+        val cutoff = TrashPolicy.cutoff()
+        dao.purgeTrash(cutoff)
+
         val remote = drive.download(token)
         val localProjects = dao.getAllProjectsRaw()
         val localSteps = dao.getAllStepsRaw()
 
+        // Tombstones vencidos não voltam do remoto e deixam de ser enviados ao Drive.
         val mergedProjects = mergeLww(localProjects, remote?.projects.orEmpty(),
             { it.id }, { it.updatedAt }, { it.version })
+            .filterNot { it.isDeleted && it.updatedAt < cutoff }
         val validIds = mergedProjects.mapTo(HashSet()) { it.id }
         // Passos órfãos (projeto inexistente) são descartados para não violar a FK.
         val mergedSteps = mergeLww(localSteps, remote?.steps.orEmpty(),
             { it.id }, { it.updatedAt }, { it.version })
-            .filter { it.projectId in validIds }
+            .filter { it.projectId in validIds && !(it.isDeleted && it.updatedAt < cutoff) }
 
         // 1) Remoto → local: só o que mudou.
         val localPSet = localProjects.toSet()

@@ -28,16 +28,20 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.projet.app.R
 import com.projet.app.domain.model.Project
+import com.projet.app.domain.model.TrashPolicy
 import com.projet.app.ui.components.AnimatedProgress
 import com.projet.app.ui.components.StepItem
 import org.koin.androidx.compose.koinViewModel
@@ -50,13 +54,15 @@ fun ProjectDetailScreen(
     onBack: () -> Unit,
     viewModel: ProjectDetailViewModel = koinViewModel(parameters = { parametersOf(projectId) })
 ) {
-    val project by viewModel.project.collectAsStateWithLifecycle()
+    val ui by viewModel.uiState.collectAsStateWithLifecycle()
     var confirmDelete by remember { mutableStateOf(false) }
+
+    val title = (ui as? DetailUiState.Content)?.project?.name?.ifBlank { "Projeto" } ?: "Projeto"
 
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(project?.name?.ifBlank { "Projeto" } ?: "Projeto") },
+                title = { Text(title) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Voltar")
@@ -70,13 +76,16 @@ fun ProjectDetailScreen(
             )
         }
     ) { padding ->
-        val current = project
-        if (current == null) {
-            Box(Modifier.fillMaxSize().padding(padding), contentAlignment = Alignment.Center) {
-                CircularProgressIndicator()
-            }
-        } else {
-            DetailContent(current, viewModel, Modifier.padding(padding))
+        when (val state = ui) {
+            DetailUiState.Loading -> Box(
+                Modifier.fillMaxSize().padding(padding),
+                contentAlignment = Alignment.Center
+            ) { CircularProgressIndicator() }
+
+            // Cobre exclusão local e remota (via sync): a tela simplesmente fecha, uma única vez.
+            DetailUiState.NotFound -> LaunchedEffect(Unit) { onBack() }
+
+            is DetailUiState.Content -> DetailContent(state.project, viewModel, Modifier.padding(padding))
         }
     }
 
@@ -84,11 +93,11 @@ fun ProjectDetailScreen(
         AlertDialog(
             onDismissRequest = { confirmDelete = false },
             title = { Text("Excluir projeto?") },
-            text = { Text("O projeto e seus passos serão removidos (inclusive dos outros dispositivos após a sincronização).") },
+            text = { Text(stringResource(R.string.delete_project_message, TrashPolicy.RETENTION_DAYS)) },
             confirmButton = {
                 TextButton(onClick = {
                     confirmDelete = false
-                    viewModel.deleteProject(onBack)
+                    viewModel.deleteProject()
                 }) { Text("Excluir") }
             },
             dismissButton = { TextButton(onClick = { confirmDelete = false }) { Text("Cancelar") } }

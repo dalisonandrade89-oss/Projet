@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">Projet</string>
+
+    <!-- Lixeira -->
+    <string name="trash_title">Lixeira</string>
+    <string name="trash_back">Voltar</string>
+    <string name="trash_info">Itens excluídos ficam aqui por %1$d dias e depois são apagados definitivamente.</string>
+    <string name="trash_empty">A lixeira está vazia</string>
+    <string name="trash_restore">Restaurar</string>
+    <string name="trash_restore_item">Restaurar %1$s</string>
+    <string name="trash_unnamed">Sem nome</string>
+    <string name="trash_step_of">Passo de “%1$s”</string>
+    <string name="trash_project_no_steps">Projeto · sem passos</string>
+    <string name="trash_expiring">Será apagado em breve</string>
+    <string name="trash_project_restored">Projeto restaurado</string>
+    <string name="trash_step_restored">Passo restaurado</string>
+    <plurals name="trash_days_left">
+        <item quantity="one">Apaga em %d dia</item>
+        <item quantity="other">Apaga em %d dias</item>
+    </plurals>
+    <plurals name="trash_project_steps">
+        <item quantity="one">Projeto · %d passo</item>
+        <item quantity="other">Projeto · %d passos</item>
+    </plurals>
+
+    <string name="delete_project_message">O projeto e seus passos vão para a Lixeira e serão apagados definitivamente após %1$d dias. Até lá, você pode restaurá-lo.</string>
 </resources>
