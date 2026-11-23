@@ -2,6 +2,11 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [Não lançado]
+
+### Adicionado
+- **Ícone do app**: mochila a jato (sem piloto) em *adaptive icon* vetorial, com versão monocromática para ícones temáticos (Android 13+) e fallback para API 24–25.
+
 ## [1.1.0] - 2026-10-20
 
 ### Adicionado
