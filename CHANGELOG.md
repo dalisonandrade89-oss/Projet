@@ -4,6 +4,10 @@ Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e
 
 ## [Não lançado]
 
+### Corrigido
+- CI: o job de Release só rodava em tags `v*`, então um push na `main` gerava apenas o APK debug. Agora todo push na `main` (e o disparo manual) compila o APK **Release** e publica uma GitHub Release `vX.Y.Z.<nº da execução>`, que o auto-update do app já reconhece. Tags `v*` continuam funcionando.
+- CI: atualizados `actions/checkout` e `actions/setup-java` para v5 (aviso de Node 20/descontinuação).
+
 ### Adicionado
 - **Ícone do app**: mochila a jato (sem piloto) em *adaptive icon* vetorial, com versão monocromática para ícones temáticos (Android 13+) e fallback para API 24–25.
 

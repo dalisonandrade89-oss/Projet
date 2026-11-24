@@ -59,7 +59,8 @@ Cadastre em *Settings → Secrets and variables → Actions*: `KEYSTORE_BASE64`,
 ```bash
 git tag v1.0.0 && git push origin v1.0.0
 ```
-O workflow compila o APK assinado e cria a Release `Projet-v1.0.0.apk`. O app checa `releases/latest`
+O workflow compila o APK assinado e cria a Release `Projet-v1.0.0.apk`.
+Também **todo push na `main`** gera uma Release automática (`vX.Y.Z.<nº da execução>`, com `X.Y.Z` vindo de `versionName` em `gradle.properties`); a tag manual é opcional. O app checa `releases/latest`
 ao abrir e oferece a atualização.
 
 ## 🔖 Versionamento
