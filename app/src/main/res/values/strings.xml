@@ -24,4 +24,40 @@
     </plurals>
 
     <string name="delete_project_message">O projeto e seus passos vão para a Lixeira e serão apagados definitivamente após %1$d dias. Até lá, você pode restaurá-lo.</string>
+
+    <!-- Rodapé / Ajustes -->
+    <string name="version_label">Projet v%1$s</string>
+    <string name="settings_title">Ajustes</string>
+    <string name="settings_open">Abrir ajustes</string>
+    <string name="sync_drive">Sincronizar com o Google Drive</string>
+    <string name="sync_drive_hint">Backup e sincronização entre aparelhos</string>
+    <string name="sync_drive_running">Sincronizando…</string>
+    <string name="sort_projects">Ordenar</string>
+    <string name="theme_background">Cor de fundo</string>
+    <string name="theme_accent">Cor de destaque</string>
+    <string name="theme_default">Padrão</string>
+
+    <!-- Nomes das cores (acessibilidade / TalkBack) -->
+    <string name="bg_white">Branco</string>
+    <string name="bg_cream">Creme</string>
+    <string name="bg_light_gray">Cinza claro</string>
+    <string name="bg_ice">Azul gelo</string>
+    <string name="bg_mint">Menta</string>
+    <string name="bg_rose">Rosado</string>
+    <string name="bg_graphite">Grafite</string>
+    <string name="bg_black">Preto</string>
+    <string name="bg_night">Azul-noite</string>
+    <string name="bg_forest">Verde-floresta</string>
+    <string name="bg_wine">Vinho</string>
+    <string name="bg_violet">Roxo-escuro</string>
+    <string name="accent_purple">Roxo</string>
+    <string name="accent_blue">Azul</string>
+    <string name="accent_green">Verde</string>
+    <string name="accent_orange">Laranja</string>
+    <string name="accent_red">Vermelho</string>
+    <string name="accent_pink">Rosa</string>
+    <string name="accent_teal">Verde-água</string>
+    <string name="accent_amber">Âmbar</string>
+    <string name="accent_brown">Marrom</string>
+    <string name="accent_slate">Ardósia</string>
 </resources>

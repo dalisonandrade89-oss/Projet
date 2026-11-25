@@ -2,7 +2,19 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
-## [Não lançado]
+## [1.2.0] - 2026-11-25
+
+### Adicionado
+- **Versão no rodapé** da tela inicial (`Projet v1.2.0.N`, a mesma do APK/Release).
+- **Botão flutuante de ajustes (engrenagem)**, à esquerda e no mesmo estilo do botão "+". Abre uma folha com:
+  - **Sincronizar com o Google Drive** (antes na barra superior; durante o sync um anel gira em volta da engrenagem);
+  - **Lixeira** (antes na barra superior);
+  - **Cor de fundo** e **Cor de destaque**, com paleta de 12 fundos (claros e escuros) e 10 destaques, e botão "Padrão" para voltar ao visual do sistema. A escolha fica salva no aparelho.
+- Ícone de **ordenar** com três riscos (substitui as três bolinhas).
+
+### Alterado
+- Tema: com fundo personalizado, as superfícies (cards, diálogos, menus) e os ícones da barra de status acompanham a cor escolhida; o destaque clareia automaticamente em fundos escuros para manter o contraste.
+- Lista de projetos ganhou folga embaixo para o último card não ficar atrás dos botões flutuantes.
 
 ### Corrigido
 - CI: o job de Release só rodava em tags `v*`, então um push na `main` gerava apenas o APK debug. Agora todo push na `main` (e o disparo manual) compila o APK **Release** e publica uma GitHub Release `vX.Y.Z.<nº da execução>`, que o auto-update do app já reconhece. Tags `v*` continuam funcionando.

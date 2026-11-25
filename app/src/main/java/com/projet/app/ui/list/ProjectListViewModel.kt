@@ -8,6 +8,8 @@ import com.projet.app.data.repository.SyncResult
 import com.projet.app.domain.model.Project
 import com.projet.app.domain.model.SortOption
 import com.projet.app.domain.repository.ProjectRepository
+import com.projet.app.ui.theme.ThemePrefs
+import com.projet.app.ui.theme.ThemeSettings
 import com.projet.app.update.AppUpdaterService
 import com.projet.app.update.UpdateInfo
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -39,8 +41,14 @@ private val manualOrder = compareBy<Project>({ it.position }, { it.id })
 class ProjectListViewModel(
     private val repository: ProjectRepository,
     private val syncRepository: SyncRepository,
-    private val updater: AppUpdaterService
+    private val updater: AppUpdaterService,
+    private val themePrefs: ThemePrefs
 ) : ViewModel() {
+
+    /** Cores escolhidas (fundo/destaque) — persistidas em [ThemePrefs]. */
+    val themeSettings: StateFlow<ThemeSettings> = themePrefs.settings
+    fun setBackgroundColor(argb: Int?) = themePrefs.setBackground(argb)
+    fun setAccentColor(argb: Int?) = themePrefs.setAccent(argb)
 
     private val sort = MutableStateFlow(SortOption.MANUAL)
     private val category = MutableStateFlow<String?>(null)

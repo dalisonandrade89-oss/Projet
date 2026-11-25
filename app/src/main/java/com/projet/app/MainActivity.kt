@@ -5,6 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -13,13 +15,20 @@ import androidx.navigation.navArgument
 import com.projet.app.ui.detail.ProjectDetailScreen
 import com.projet.app.ui.list.ProjectListScreen
 import com.projet.app.ui.theme.ProjetTheme
+import com.projet.app.ui.theme.ThemePrefs
 import com.projet.app.ui.trash.TrashScreen
+import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
+    private val themePrefs: ThemePrefs by inject()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContent { ProjetTheme { ProjetNavHost() } }
+        setContent {
+            val theme by themePrefs.settings.collectAsStateWithLifecycle()
+            ProjetTheme(theme) { ProjetNavHost() }
+        }
     }
 }
 

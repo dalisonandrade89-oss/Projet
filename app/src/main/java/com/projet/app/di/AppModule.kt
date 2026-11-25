@@ -9,6 +9,7 @@ import com.projet.app.data.repository.SyncRepository
 import com.projet.app.domain.repository.ProjectRepository
 import com.projet.app.ui.detail.ProjectDetailViewModel
 import com.projet.app.ui.list.ProjectListViewModel
+import com.projet.app.ui.theme.ThemePrefs
 import com.projet.app.ui.trash.TrashViewModel
 import com.projet.app.update.AppUpdaterService
 import com.projet.app.work.SyncScheduler
@@ -32,11 +33,14 @@ val appModule = module {
     // Domínio
     single<ProjectRepository> { ProjectRepositoryImpl(get(), get()) }
 
+    // Preferências de aparência
+    single { ThemePrefs(androidContext()) }
+
     // Auto-update
     single { AppUpdaterService(androidContext(), get()) }
 
     // ViewModels
-    viewModel { ProjectListViewModel(get(), get(), get()) }
+    viewModel { ProjectListViewModel(get(), get(), get(), get()) }
     viewModel { (projectId: String) -> ProjectDetailViewModel(projectId, get()) }
     viewModel { TrashViewModel(get()) }
 }

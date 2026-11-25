@@ -16,6 +16,8 @@ progresso em tempo real, auto-save e backup/sincronização no Google Drive.
 - Ordenação por nome (A-Z/Z-A), categoria, progresso (0-100%/100-0%) e posição manual; filtro por categoria.
 - Offline-first (Room) + sincronização incremental com o Google Drive (`appDataFolder`), Last-Write-Wins por `updatedAt`.
 - Auto-update in-app a partir das Releases do GitHub.
+- Ajustes pela engrenagem flutuante: sincronizar com o Drive, Lixeira e personalização de cor de fundo e de destaque.
+- Versão do app exibida no rodapé da tela inicial.
 - **Lixeira de 30 dias**: projetos e passos excluídos podem ser restaurados; depois disso são apagados definitivamente.
 
 ## 🧱 Stack
@@ -67,6 +69,16 @@ ao abrir e oferece a atualização.
 Segue [SemVer](https://semver.org/lang/pt-BR/). A versão vive em `gradle.properties` (`versionName`/`versionCode`),
 o histórico em [CHANGELOG.md](CHANGELOG.md) e a política (quando subir PATCH/MINOR/MAJOR, versão do Room e do backup)
 está no fim do changelog. No CI de release a versão vem da tag (`v1.1.0`).
+
+## 🔐 Onde ficam as chaves (nada disso vai no repositório)
+| O quê | Onde |
+|---|---|
+| `KEYSTORE_BASE64`, `KEYSTORE_PASSWORD`, `KEY_ALIAS`, `KEY_PASSWORD` | GitHub → *Settings → Secrets and variables → Actions* |
+| Cliente OAuth do Drive (pacote `com.projet.app` + SHA-1 do keystore) | Google Cloud Console → *Credenciais* |
+| Backup do keystore e das senhas | Gerenciador de senhas / nuvem privada (sem ele o app instalado não atualiza mais) |
+
+Nunca faça commit de `.jks`, senhas ou o arquivo de segredos. Para voltar a uma versão anterior do código,
+use o histórico do GitHub (*Commits → ⋯ → Revert*); os Secrets não são afetados.
 
 ## 📄 Licença
 GPL-3.0 — veja [LICENSE](LICENSE).
