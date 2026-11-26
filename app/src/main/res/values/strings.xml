@@ -60,4 +60,24 @@
     <string name="accent_amber">Âmbar</string>
     <string name="accent_brown">Marrom</string>
     <string name="accent_slate">Ardósia</string>
+
+    <!-- Aviso de sincronização -->
+    <string name="sync_done_title">Sincronizado!</string>
+    <string name="sync_done_message">Seus projetos foram sincronizados com o Google Drive.</string>
+    <string name="sync_failed_title">Não foi possível sincronizar</string>
+    <string name="sync_failed_message">%1$s</string>
+    <string name="action_ok">OK</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="action_add">Adicionar</string>
+
+    <!-- Subcategorias e organização de passos -->
+    <string name="organize_steps">Organizar passos</string>
+    <string name="organize_hint">Modo organizar: use as setas para definir a prioridade e escolha a subcategoria de cada passo.</string>
+    <string name="subcategory_label">Subcategoria</string>
+    <string name="no_subcategory">Sem subcategoria</string>
+    <string name="new_subcategory">Nova subcategoria…</string>
+    <string name="new_subcategory_title">Nova subcategoria</string>
+    <string name="new_subcategory_hint">Ex.: Mecânica, Estética</string>
+    <string name="move_step_up">Mover passo para cima</string>
+    <string name="move_step_down">Mover passo para baixo</string>
 </resources>

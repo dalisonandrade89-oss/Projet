@@ -2,6 +2,7 @@ package com.projet.app.di
 
 import androidx.room.Room
 import com.projet.app.data.local.AppDatabase
+import com.projet.app.data.local.MIGRATION_1_2
 import com.projet.app.data.remote.DriveAuthManager
 import com.projet.app.data.remote.GoogleDriveService
 import com.projet.app.data.repository.ProjectRepositoryImpl
@@ -20,7 +21,11 @@ import org.koin.dsl.module
 
 val appModule = module {
     // Dados
-    single { Room.databaseBuilder(androidContext(), AppDatabase::class.java, "projet.db").build() }
+    single {
+        Room.databaseBuilder(androidContext(), AppDatabase::class.java, "projet.db")
+            .addMigrations(MIGRATION_1_2)
+            .build()
+    }
     single { get<AppDatabase>().projectDao() }
     single { OkHttpClient() }
 

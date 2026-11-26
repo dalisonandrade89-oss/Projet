@@ -29,9 +29,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
@@ -94,6 +96,7 @@ fun ProjectListScreen(
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val theme by viewModel.themeSettings.collectAsStateWithLifecycle()
+    val syncNotice by viewModel.syncNotice.collectAsStateWithLifecycle()
     val snackbar = remember { SnackbarHostState() }
     var showCreate by remember { mutableStateOf(false) }
     var showSortMenu by remember { mutableStateOf(false) }
@@ -231,6 +234,11 @@ fun ProjectListScreen(
         )
     }
 
+    // Popup do resultado da sincronização manual (sucesso ou falha).
+    syncNotice?.let { notice ->
+        SyncNoticeDialog(notice = notice, onDismiss = viewModel::dismissSyncNotice)
+    }
+
     if (showCreate) {
         CreateProjectDialog(
             onDismiss = { showCreate = false },
@@ -249,6 +257,31 @@ fun ProjectListScreen(
             onDismiss = viewModel::dismissUpdate
         )
     }
+}
+
+@Composable
+private fun SyncNoticeDialog(notice: SyncNotice, onDismiss: () -> Unit) {
+    val success = notice is SyncNotice.Success
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        icon = {
+            Icon(
+                imageVector = if (success) Icons.Default.CheckCircle else Icons.Default.Warning,
+                contentDescription = null,
+                tint = if (success) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error
+            )
+        },
+        title = { Text(stringResource(if (success) R.string.sync_done_title else R.string.sync_failed_title)) },
+        text = {
+            Text(
+                when (notice) {
+                    SyncNotice.Success -> stringResource(R.string.sync_done_message)
+                    is SyncNotice.Failure -> stringResource(R.string.sync_failed_message, notice.message)
+                }
+            )
+        },
+        confirmButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_ok)) } }
+    )
 }
 
 /** Rodapé discreto com a versão instalada (BuildConfig.VERSION_NAME, definida pelo CI). */

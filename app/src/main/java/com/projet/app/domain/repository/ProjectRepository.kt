@@ -15,12 +15,21 @@ interface ProjectRepository {
     /** Auto-Save com debounce: pode ser chamado a cada tecla; só grava após uma pausa. */
     fun updateProjectInfo(id: String, name: String, category: String, description: String)
 
-    suspend fun addStep(projectId: String, title: String)
+    suspend fun addStep(projectId: String, title: String, subcategory: String = "")
     suspend fun setStepCompleted(stepId: String, completed: Boolean)
     suspend fun deleteStep(stepId: String)
 
     /** Auto-Save com debounce do título do passo. */
     fun updateStepTitle(stepId: String, title: String)
+
+    /** Define a subcategoria do passo (vazio = nenhuma). O passo mantém sua posição. */
+    suspend fun setStepSubcategory(stepId: String, subcategory: String)
+
+    /**
+     * Prioridade manual: sobe (-1) ou desce (+1) o passo entre os pendentes da sua subcategoria.
+     * Concluídos ficam sempre no fim e não se movem.
+     */
+    suspend fun moveStep(stepId: String, delta: Int)
 
     // ---------------------------------------------------------------- Lixeira (30 dias)
 

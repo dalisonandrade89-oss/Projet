@@ -2,6 +2,17 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.3.0] - 2026-11-26
+
+### Adicionado
+- **Subcategorias dentro do projeto** (ex.: "Mecânica", "Estética"): os passos aparecem agrupados, cada grupo com seu próprio contador e barra de progresso. Sem nenhuma subcategoria a lista continua simples, como antes.
+- **Modo organizar** (ícone de três riscos na tela do projeto): setas ↑↓ em cada passo para definir a **prioridade manual** (dentro da subcategoria; concluídos ficam no fim) e seletor de subcategoria por passo. O campo "Novo passo" também escolhe a subcategoria e lembra a última usada.
+- **Popup de sincronização**: ao tocar em "Sincronizar com o Google Drive", um diálogo confirma o sucesso (ou explica a falha) em vez da mensagem rápida que sumia.
+
+### Alterado
+- **Banco de dados v1 → v2** com migração (coluna `subcategory` nos passos). Os dados existentes são preservados; passos antigos ficam "sem subcategoria".
+- Backup no Drive passa a incluir a subcategoria. Backups antigos continuam sendo lidos normalmente. Aparelhos ainda na 1.2 ou anterior ignoram o campo — atualize todos.
+
 ## [1.2.0] - 2026-11-25
 
 ### Adicionado

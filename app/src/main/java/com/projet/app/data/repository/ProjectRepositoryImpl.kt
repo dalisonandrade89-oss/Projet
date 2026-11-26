@@ -8,6 +8,7 @@ import com.projet.app.data.local.toTrashItem
 import com.projet.app.domain.model.Project
 import com.projet.app.domain.model.TrashItem
 import com.projet.app.domain.model.TrashPolicy
+import com.projet.app.domain.model.subcategoryKey
 import com.projet.app.domain.repository.ProjectRepository
 import com.projet.app.work.SyncScheduler
 import kotlinx.coroutines.CoroutineScope
@@ -86,14 +87,56 @@ class ProjectRepositoryImpl(
         }
     }
 
-    override suspend fun addStep(projectId: String, title: String) {
+    override suspend fun addStep(projectId: String, title: String, subcategory: String) {
         dao.upsertStep(
             StepEntity(
                 projectId = projectId,
                 title = title,
+                subcategory = canonicalSubcategory(projectId, subcategory),
                 position = dao.maxStepPosition(projectId) + 1
             )
         )
+        syncScheduler.schedule()
+    }
+
+    override suspend fun setStepSubcategory(stepId: String, subcategory: String) {
+        val current = dao.getStep(stepId) ?: return
+        val canonical = canonicalSubcategory(current.projectId, subcategory)
+        if (current.subcategory == canonical) return
+        dao.upsertStep(
+            current.copy(subcategory = canonical, version = current.version + 1, updatedAt = System.currentTimeMillis())
+        )
+        syncScheduler.schedule()
+    }
+
+    /**
+     * Reaproveita as mesmas "casas" de posição do grupo, só trocando quem ocupa cada uma — assim
+     * a posição do grupo na lista e dos outros grupos não muda. Posições repetidas (dois aparelhos
+     * offline) são desempatadas com valores estritamente crescentes. Uma única gravação em lote.
+     */
+    override suspend fun moveStep(stepId: String, delta: Int) {
+        val current = dao.getStep(stepId) ?: return
+        if (current.isCompleted || current.isDeleted) return
+        val key = subcategoryKey(current.subcategory)
+        // getActiveSteps já vem ordenado por (position, id).
+        val group = dao.getActiveSteps(current.projectId)
+            .filter { !it.isCompleted && subcategoryKey(it.subcategory) == key }
+        val from = group.indexOfFirst { it.id == stepId }
+        val to = from + delta
+        if (from < 0 || to !in group.indices) return
+
+        val reordered = group.toMutableList().apply { add(to, removeAt(from)) }
+        val now = System.currentTimeMillis()
+        var previous = Int.MIN_VALUE
+        val changed = reordered.mapIndexedNotNull { index, step ->
+            val slot = group[index].position
+            val position = if (previous == Int.MIN_VALUE) slot else maxOf(slot, previous + 1)
+            previous = position
+            if (step.position == position) null
+            else step.copy(position = position, version = step.version + 1, updatedAt = now)
+        }
+        if (changed.isEmpty()) return
+        dao.upsertSteps(changed)
         syncScheduler.schedule()
     }
 
@@ -167,6 +210,18 @@ class ProjectRepositoryImpl(
 
     // ---------------------------------------------------------------- helpers
 
+    /** Normaliza o nome e reaproveita a grafia que o projeto já usa ("mecânica" → "Mecânica"). */
+    private suspend fun canonicalSubcategory(projectId: String, raw: String): String {
+        val clean = raw.trim().take(MAX_SUBCATEGORY_LENGTH)
+        if (clean.isEmpty()) return ""
+        val key = subcategoryKey(clean)
+        return dao.getActiveSteps(projectId)
+            .filter { subcategoryKey(it.subcategory) == key }
+            .minByOrNull { it.id }          // mesma regra de grafia usada para exibir o grupo
+            ?.subcategory?.trim()
+            ?: clean
+    }
+
     private fun debounced(key: String, block: suspend () -> Unit) {
         pending[key]?.cancel()
         val job = scope.launch {
@@ -192,5 +247,6 @@ class ProjectRepositoryImpl(
 
     private companion object {
         const val DEBOUNCE_MS = 500L
+        const val MAX_SUBCATEGORY_LENGTH = 40
     }
 }

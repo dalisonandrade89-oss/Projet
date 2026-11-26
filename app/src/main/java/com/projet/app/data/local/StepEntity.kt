@@ -27,6 +27,8 @@ data class StepEntity(
     val title: String,
     val isCompleted: Boolean = false,
     val position: Int = 0,
+    /** Subcategoria dentro do projeto (ex.: "Mecânica"); vazio = sem subcategoria. */
+    val subcategory: String = "",
     val completedAt: Long? = null,
     val version: Int = 1,
     val updatedAt: Long = System.currentTimeMillis(),

@@ -30,6 +30,10 @@ abstract class ProjectDao {
     @Query("SELECT * FROM steps WHERE id = :id")
     abstract suspend fun getStep(id: String): StepEntity?
 
+    /** Passos ativos do projeto, na ordem manual (desempate por id, como no resto do app). */
+    @Query("SELECT * FROM steps WHERE projectId = :projectId AND isDeleted = 0 ORDER BY position ASC, id ASC")
+    abstract suspend fun getActiveSteps(projectId: String): List<StepEntity>
+
     @Query("SELECT COALESCE(MAX(position), -1) FROM projects WHERE isDeleted = 0")
     abstract suspend fun maxProjectPosition(): Int
 

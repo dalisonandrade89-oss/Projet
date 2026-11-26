@@ -29,5 +29,6 @@ fun StepEntity.toDomain(): Step = Step(
     title = title,
     isCompleted = isCompleted,
     position = position,
+    subcategory = subcategory,
     completedAt = completedAt
 )

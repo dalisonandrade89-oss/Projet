@@ -24,6 +24,12 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+/** Resultado de uma sincronização MANUAL, mostrado em um diálogo (o sync em segundo plano é silencioso). */
+sealed interface SyncNotice {
+    data object Success : SyncNotice
+    data class Failure(val message: String) : SyncNotice
+}
+
 data class UpdateUi(val info: UpdateInfo? = null, val progress: Float? = null)
 
 data class ProjectListUiState(
@@ -54,6 +60,10 @@ class ProjectListViewModel(
     private val category = MutableStateFlow<String?>(null)
     private val syncing = MutableStateFlow(false)
     private val updateUi = MutableStateFlow(UpdateUi())
+
+    private val _syncNotice = MutableStateFlow<SyncNotice?>(null)
+    val syncNotice: StateFlow<SyncNotice?> = _syncNotice
+    fun dismissSyncNotice() { _syncNotice.value = null }
 
     private val _messages = MutableSharedFlow<String>(extraBufferCapacity = 4)
     val messages: SharedFlow<String> = _messages.asSharedFlow()
@@ -123,9 +133,9 @@ class ProjectListViewModel(
             syncing.value = true
             try {
                 when (val result = syncRepository.sync()) {
-                    SyncResult.Success -> _messages.emit("Sincronizado com o Google Drive")
+                    SyncResult.Success -> { _syncNotice.value = SyncNotice.Success }
                     is SyncResult.NeedsConsent -> _consentRequests.emit(result.pendingIntent)
-                    is SyncResult.Error -> _messages.emit("Erro ao sincronizar: ${result.message}")
+                    is SyncResult.Error -> { _syncNotice.value = SyncNotice.Failure(result.message) }
                 }
             } finally {
                 syncing.value = false

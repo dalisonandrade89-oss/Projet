@@ -32,9 +32,18 @@ class ProjectDetailViewModel(
     fun updateInfo(name: String, category: String, description: String) =
         repository.updateProjectInfo(projectId, name, category, description)
 
-    fun addStep(title: String) {
+    fun addStep(title: String, subcategory: String = "") {
         if (title.isBlank()) return
-        viewModelScope.launch { repository.addStep(projectId, title.trim()) }
+        viewModelScope.launch { repository.addStep(projectId, title.trim(), subcategory) }
+    }
+
+    fun setStepSubcategory(stepId: String, subcategory: String) {
+        viewModelScope.launch { repository.setStepSubcategory(stepId, subcategory) }
+    }
+
+    /** Prioridade manual: delta -1 sobe, +1 desce (dentro da subcategoria). */
+    fun moveStep(stepId: String, delta: Int) {
+        viewModelScope.launch { repository.moveStep(stepId, delta) }
     }
 
     fun setStepCompleted(stepId: String, completed: Boolean) {
