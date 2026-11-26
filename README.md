@@ -19,7 +19,8 @@ progresso em tempo real, auto-save e backup/sincronização no Google Drive.
 - Ajustes pela engrenagem flutuante: sincronizar com o Drive, Lixeira e personalização de cor de fundo e de destaque.
 - Versão do app exibida no rodapé da tela inicial.
 - Subcategorias dentro de cada projeto (com progresso por grupo) e modo organizar para definir a prioridade dos passos com setas.
-- Popup de confirmação ao sincronizar com o Drive.
+- Popup de acompanhamento/confirmação ao sincronizar com o Drive e "última sincronização" nos ajustes.
+- Pesquisa por texto completo ou parcial (sem acento/maiúscula) em projetos, passos e subcategorias, com destaque no card.
 - **Lixeira de 30 dias**: projetos e passos excluídos podem ser restaurados; depois disso são apagados definitivamente.
 
 ## 🧱 Stack

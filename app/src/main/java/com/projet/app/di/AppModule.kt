@@ -3,6 +3,7 @@ package com.projet.app.di
 import androidx.room.Room
 import com.projet.app.data.local.AppDatabase
 import com.projet.app.data.local.MIGRATION_1_2
+import com.projet.app.data.local.SyncStatusPrefs
 import com.projet.app.data.remote.DriveAuthManager
 import com.projet.app.data.remote.GoogleDriveService
 import com.projet.app.data.repository.ProjectRepositoryImpl
@@ -33,7 +34,8 @@ val appModule = module {
     single { SyncScheduler(androidContext()) }
     single { DriveAuthManager(androidContext()) }
     single { GoogleDriveService(get()) }
-    single { SyncRepository(get(), get(), get()) }
+    single { SyncStatusPrefs(androidContext()) }
+    single { SyncRepository(get(), get(), get(), get()) }
 
     // Domínio
     single<ProjectRepository> { ProjectRepositoryImpl(get(), get()) }

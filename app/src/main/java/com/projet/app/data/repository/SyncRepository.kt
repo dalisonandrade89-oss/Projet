@@ -2,6 +2,7 @@ package com.projet.app.data.repository
 
 import android.app.PendingIntent
 import com.projet.app.data.local.ProjectDao
+import com.projet.app.data.local.SyncStatusPrefs
 import com.projet.app.data.remote.AuthState
 import com.projet.app.data.remote.BackupFile
 import com.projet.app.data.remote.DriveAuthManager
@@ -34,9 +35,13 @@ sealed interface SyncResult {
 class SyncRepository(
     private val dao: ProjectDao,
     private val drive: GoogleDriveService,
-    private val auth: DriveAuthManager
+    private val auth: DriveAuthManager,
+    private val status: SyncStatusPrefs
 ) {
     private val mutex = Mutex() // evita duas sincronizações simultâneas
+
+    /** Quando o último sync (manual ou em segundo plano) terminou com sucesso. */
+    val lastSyncAt get() = status.lastSyncAt
 
     suspend fun sync(): SyncResult = mutex.withLock {
         withContext(Dispatchers.IO) {
@@ -45,6 +50,7 @@ class SyncRepository(
                     is AuthState.NeedsConsent -> SyncResult.NeedsConsent(state.pendingIntent)
                     is AuthState.Token -> {
                         runSync(state.accessToken)
+                        status.markSynced()
                         SyncResult.Success
                     }
                 }

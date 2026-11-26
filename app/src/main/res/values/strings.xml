@@ -65,7 +65,7 @@
     <string name="sync_done_title">Sincronizado!</string>
     <string name="sync_done_message">Seus projetos foram sincronizados com o Google Drive.</string>
     <string name="sync_failed_title">Não foi possível sincronizar</string>
-    <string name="sync_failed_message">%1$s</string>
+    <string name="sync_failed_message">Motivo: %1$s</string>
     <string name="action_ok">OK</string>
     <string name="action_cancel">Cancelar</string>
     <string name="action_add">Adicionar</string>
@@ -80,4 +80,21 @@
     <string name="new_subcategory_hint">Ex.: Mecânica, Estética</string>
     <string name="move_step_up">Mover passo para cima</string>
     <string name="move_step_down">Mover passo para baixo</string>
+
+    <!-- Aviso de sincronização (estados) -->
+    <string name="sync_progress_title">Sincronizando…</string>
+    <string name="sync_progress_message">Enviando e baixando seus projetos do Google Drive.</string>
+    <string name="sync_consent_denied">A sincronização foi cancelada. É preciso autorizar o acesso ao Google Drive para sincronizar.</string>
+    <string name="sync_timeout">A sincronização demorou demais e foi interrompida. Verifique a internet e tente de novo.</string>
+    <string name="sync_last">Última sincronização: %1$s</string>
+    <string name="action_hide">Ocultar</string>
+
+    <!-- Pesquisa -->
+    <string name="search_open">Pesquisar</string>
+    <string name="search_hint">Pesquisar projetos e passos…</string>
+    <string name="search_close">Fechar pesquisa</string>
+    <string name="search_clear">Limpar texto</string>
+    <string name="search_no_results">Nenhum resultado para “%1$s”.</string>
+    <string name="search_count">%1$d projeto(s) encontrado(s)</string>
+    <string name="search_more_steps">e mais %1$d passo(s) encontrado(s)</string>
 </resources>

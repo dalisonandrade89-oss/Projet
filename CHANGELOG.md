@@ -2,6 +2,16 @@
 
 Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e versionamento [SemVer](https://semver.org/lang/pt-BR/).
 
+## [1.4.0] - 2026-11-26
+
+### Adicionado
+- **Pesquisa** (lupa ao lado do botão de ordenar): encontra texto completo ou parcial ("mec" acha "Mecânica"), sem diferenciar maiúsculas/minúsculas nem acentos, procurando em nome, categoria, descrição, passos e subcategorias. Várias palavras funcionam em "E" ("lavar roda"). Mostra os **cards** onde o texto está, com o trecho **destacado** e os passos encontrados listados no card; a pesquisa vale para todos os projetos (ignora o filtro de categoria) e o botão voltar fecha a busca.
+- **Última sincronização** (data e hora) na folha de ajustes, guardada no aparelho (conta também as sincronizações em segundo plano).
+
+### Corrigido
+- **Aviso de sincronização**: agora o popup aparece **na hora do toque** ("Sincronizando…") e vira "Sincronizado!" ou a mensagem de erro. Antes o resultado só aparecia ao final e passava em branco se a sincronização demorasse ou a autorização do Google fosse cancelada.
+- Autorização do Google cancelada e sincronização travada (limite de 60 s) agora mostram um aviso claro.
+
 ## [1.3.0] - 2026-11-26
 
 ### Adicionado

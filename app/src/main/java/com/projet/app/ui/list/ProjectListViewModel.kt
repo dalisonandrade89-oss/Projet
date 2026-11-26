@@ -8,6 +8,7 @@ import com.projet.app.data.repository.SyncResult
 import com.projet.app.domain.model.Project
 import com.projet.app.domain.model.SortOption
 import com.projet.app.domain.repository.ProjectRepository
+import com.projet.app.domain.search.ProjectSearch
 import com.projet.app.ui.theme.ThemePrefs
 import com.projet.app.ui.theme.ThemeSettings
 import com.projet.app.update.AppUpdaterService
@@ -23,12 +24,21 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /** Resultado de uma sincronização MANUAL, mostrado em um diálogo (o sync em segundo plano é silencioso). */
 sealed interface SyncNotice {
+    /** Aparece já no toque em "Sincronizar" e é substituído pelo resultado. */
+    data object InProgress : SyncNotice
     data object Success : SyncNotice
     data class Failure(val message: String) : SyncNotice
+    /** O usuário cancelou a tela de autorização do Google. */
+    data object ConsentDenied : SyncNotice
+    data object Timeout : SyncNotice
 }
+
+/** Teto para a sincronização manual: sem isso um travamento de rede deixaria o usuário sem resposta. */
+private const val SYNC_TIMEOUT_MS = 60_000L
 
 data class UpdateUi(val info: UpdateInfo? = null, val progress: Float? = null)
 
@@ -58,6 +68,7 @@ class ProjectListViewModel(
 
     private val sort = MutableStateFlow(SortOption.MANUAL)
     private val category = MutableStateFlow<String?>(null)
+    private val query = MutableStateFlow("")
     private val syncing = MutableStateFlow(false)
     private val updateUi = MutableStateFlow(UpdateUi())
 
@@ -72,14 +83,24 @@ class ProjectListViewModel(
     /** A UI coleta e lança o PendingIntent da tela de consentimento do Google. */
     val consentRequests: SharedFlow<PendingIntent> = _consentRequests.asSharedFlow()
 
+    /** Horário do último sync concluído (null = nunca). */
+    val lastSyncAt: StateFlow<Long?> = syncRepository.lastSyncAt
+
     val uiState: StateFlow<ProjectListUiState> = combine(
-        repository.observeProjects(), sort, category, syncing, updateUi
-    ) { projects, sortOption, selectedCategory, isSyncing, update ->
+        repository.observeProjects(), sort, combine(category, query) { c, q -> c to q }, syncing, updateUi
+    ) { projects, sortOption, (selectedCategory, searchQuery), isSyncing, update ->
         val categories = projects.map { it.category }.filter { it.isNotBlank() }.distinct().sorted()
         // Se a categoria filtrada deixou de existir (renomeada/excluída), volta para "Todas"
         // em vez de mostrar uma lista vazia sem nenhum chip selecionado.
         val activeCategory = selectedCategory?.takeIf { it in categories }
-        val filtered = activeCategory?.let { c -> projects.filter { it.category == c } } ?: projects
+        // Com pesquisa ativa ela vale para TODOS os projetos (o filtro de categoria é ignorado):
+        // quem procura um texto não quer que um chip esquecido esconda o resultado.
+        val tokens = ProjectSearch.tokens(searchQuery)
+        val filtered = when {
+            tokens.isNotEmpty() -> projects.filter { ProjectSearch.matches(it, tokens) }
+            activeCategory != null -> projects.filter { it.category == activeCategory }
+            else -> projects
+        }
         ProjectListUiState(
             projects = applySort(filtered, sortOption),
             sort = sortOption,
@@ -108,6 +129,7 @@ class ProjectListViewModel(
     }
 
     fun setSort(option: SortOption) { sort.value = option }
+    fun setSearchQuery(value: String) { query.value = value }
     fun setCategory(value: String?) { category.value = value }
 
     fun createProject(name: String, category: String, description: String) {
@@ -131,17 +153,27 @@ class ProjectListViewModel(
         if (syncing.value) return
         viewModelScope.launch {
             syncing.value = true
+            // Feedback imediato: o popup "Sincronizando…" aparece já no toque e vira o resultado.
+            _syncNotice.value = SyncNotice.InProgress
             try {
-                when (val result = syncRepository.sync()) {
-                    SyncResult.Success -> { _syncNotice.value = SyncNotice.Success }
-                    is SyncResult.NeedsConsent -> _consentRequests.emit(result.pendingIntent)
-                    is SyncResult.Error -> { _syncNotice.value = SyncNotice.Failure(result.message) }
+                val result = withTimeoutOrNull(SYNC_TIMEOUT_MS) { syncRepository.sync() }
+                _syncNotice.value = when (result) {
+                    null -> SyncNotice.Timeout
+                    SyncResult.Success -> SyncNotice.Success
+                    is SyncResult.NeedsConsent -> {
+                        _consentRequests.emit(result.pendingIntent)
+                        null // a tela do Google assume; o resultado vem depois do consentimento
+                    }
+                    is SyncResult.Error -> SyncNotice.Failure(result.message)
                 }
             } finally {
                 syncing.value = false
             }
         }
     }
+
+    /** Chamado quando a tela de autorização do Google é fechada sem aprovar. */
+    fun onConsentDenied() { _syncNotice.value = SyncNotice.ConsentDenied }
 
     // ------------------------------------------------------------ lixeira
     /** Apaga de vez o que passou de 30 dias na Lixeira (funciona mesmo sem Drive/consentimento). */
