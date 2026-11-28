@@ -1,85 +1,379 @@
 # Changelog
 
-Formato baseado em [Keep a Changelog](https://keepachangelog.com/pt-BR/1.1.0/) e versionamento [SemVer](https://semver.org/lang/pt-BR/).
+Todas as mudanças notáveis do projeto são registradas aqui.
 
-## [1.4.0] - 2026-11-26
+O formato segue o [Keep a Changelog](https://keepachangelog.com/pt-BR/1.0.0/),
+e o projeto usa [Versionamento Semântico](https://semver.org/lang/pt-BR/)
+(`MAJOR.MINOR.PATCH`) a partir da v1.2.0:
 
-### Adicionado
-- **Pesquisa** (lupa ao lado do botão de ordenar): encontra texto completo ou parcial ("mec" acha "Mecânica"), sem diferenciar maiúsculas/minúsculas nem acentos, procurando em nome, categoria, descrição, passos e subcategorias. Várias palavras funcionam em "E" ("lavar roda"). Mostra os **cards** onde o texto está, com o trecho **destacado** e os passos encontrados listados no card; a pesquisa vale para todos os projetos (ignora o filtro de categoria) e o botão voltar fecha a busca.
-- **Última sincronização** (data e hora) na folha de ajustes, guardada no aparelho (conta também as sincronizações em segundo plano).
+- **MAJOR** — mudança incompatível (ex.: exige reconfigurar apps/Spaces)
+- **MINOR** — funcionalidade nova, compatível com o que já existia
+- **PATCH** — correção de bug ou de performance, sem funcionalidade nova
 
-### Corrigido
-- **Aviso de sincronização**: agora o popup aparece **na hora do toque** ("Sincronizando…") e vira "Sincronizado!" ou a mensagem de erro. Antes o resultado só aparecia ao final e passava em branco se a sincronização demorasse ou a autorização do Google fosse cancelada.
-- Autorização do Google cancelada e sincronização travada (limite de 60 s) agora mostram um aviso claro.
-
-## [1.3.0] - 2026-11-26
-
-### Adicionado
-- **Subcategorias dentro do projeto** (ex.: "Mecânica", "Estética"): os passos aparecem agrupados, cada grupo com seu próprio contador e barra de progresso. Sem nenhuma subcategoria a lista continua simples, como antes.
-- **Modo organizar** (ícone de três riscos na tela do projeto): setas ↑↓ em cada passo para definir a **prioridade manual** (dentro da subcategoria; concluídos ficam no fim) e seletor de subcategoria por passo. O campo "Novo passo" também escolhe a subcategoria e lembra a última usada.
-- **Popup de sincronização**: ao tocar em "Sincronizar com o Google Drive", um diálogo confirma o sucesso (ou explica a falha) em vez da mensagem rápida que sumia.
+## [1.9.9] - 2026-11-28
 
 ### Alterado
-- **Banco de dados v1 → v2** com migração (coluna `subcategory` nos passos). Os dados existentes são preservados; passos antigos ficam "sem subcategoria".
-- Backup no Drive passa a incluir a subcategoria. Backups antigos continuam sendo lidos normalmente. Aparelhos ainda na 1.2 ou anterior ignoram o campo — atualize todos.
+- **Pipeline de assinatura e publicação automática de release (`.github/workflows/build.yml`):** estruturado em jobs separados (`build` e `release`), com `permissions: contents: write`, `concurrency`, decodificação segura de `RELEASE_KEYSTORE_BASE64` em `$RUNNER_TEMP`, suporte a tags `v*` e publicação automática com `softprops/action-gh-release@v2` (`make_latest: true`).
 
-## [1.2.0] - 2026-11-25
-
-### Adicionado
-- **Versão no rodapé** da tela inicial (`Projet v1.2.0.N`, a mesma do APK/Release).
-- **Botão flutuante de ajustes (engrenagem)**, à esquerda e no mesmo estilo do botão "+". Abre uma folha com:
-  - **Sincronizar com o Google Drive** (antes na barra superior; durante o sync um anel gira em volta da engrenagem);
-  - **Lixeira** (antes na barra superior);
-  - **Cor de fundo** e **Cor de destaque**, com paleta de 12 fundos (claros e escuros) e 10 destaques, e botão "Padrão" para voltar ao visual do sistema. A escolha fica salva no aparelho.
-- Ícone de **ordenar** com três riscos (substitui as três bolinhas).
-
-### Alterado
-- Tema: com fundo personalizado, as superfícies (cards, diálogos, menus) e os ícones da barra de status acompanham a cor escolhida; o destaque clareia automaticamente em fundos escuros para manter o contraste.
-- Lista de projetos ganhou folga embaixo para o último card não ficar atrás dos botões flutuantes.
+## [1.9.8] - 2026-11-27
 
 ### Corrigido
-- CI: o job de Release só rodava em tags `v*`, então um push na `main` gerava apenas o APK debug. Agora todo push na `main` (e o disparo manual) compila o APK **Release** e publica uma GitHub Release `vX.Y.Z.<nº da execução>`, que o auto-update do app já reconhece. Tags `v*` continuam funcionando.
-- CI: atualizados `actions/checkout` e `actions/setup-java` para v5 (aviso de Node 20/descontinuação).
+- **Escape de aspas em literais Kotlin (`MainActivity.kt`, `PwaShortcut.kt`, `AppDrawerScreen.kt`):** corrigidas aspas internas não escapadas nas mensagens de orientação de instalação de PWA (`"Instalar página como app"`, `"Adicionar à tela inicial"`, `"Instalar aplicativo"`).
 
-### Adicionado
-- **Ícone do app**: mochila a jato (sem piloto) em *adaptive icon* vetorial, com versão monocromática para ícones temáticos (Android 13+) e fallback para API 24–25.
-
-## [1.1.0] - 2026-10-20
-
-### Adicionado
-- **Lixeira de 30 dias**: projetos e passos excluídos podem ser restaurados em *Lixeira* (ícone na barra da lista).
-  - Projeto restaurado volta ao fim da lista, com seus passos; passo restaurado volta ao fim dos passos.
-  - A limpeza definitiva (após 30 dias) roda ao abrir o app e a cada sincronização, também removendo os tombstones vencidos do Drive.
-- Strings da Lixeira em `strings.xml` (com plurais).
-
-### Corrigido
-- Crash do auto-update no Android 7.x (API 24–25): `canRequestPackageInstalls()` só existe a partir da API 26.
-- Filtro de categoria "fantasma": se a categoria filtrada deixa de existir, a lista volta para "Todas".
-- Tela de detalhe: distingue carregando × não encontrado; fecha sozinha se o projeto for excluído (aqui ou em outro aparelho) e sem pop duplo.
-- Reordenação manual agora é uma única gravação atômica (sem piscar, sem ordem pela metade).
-- Ordem estável quando `position` empata (desempate por `id`) em projetos, passos e nas consultas do Room.
-- `.gitignore` reescrito, incluindo `.kotlin/`.
+## [1.9.7] - 2026-11-27
 
 ### Alterado
-- Mensagem de exclusão de projeto informa que ele vai para a Lixeira.
-- Versão do app agora vive em `gradle.properties` (`versionName`/`versionCode`).
+- **Fluxo PWA focado em Brave e Vivaldi:** priorizados `Brave` e `Vivaldi` como navegadores principais, removendo fallback forçado para o Chrome e adicionando ação direta para abrir a URL no navegador escolhido com orientação para instalar pelo menu do navegador ("Instalar página como app") sem barra de URL ou botões do navegador na experiência instalada.
 
-### Notas de migração
-- Sem alteração de schema do Room (continua `version = 1`) e do backup (`schemaVersion = 1`): atualização direta, sem migração.
+## [1.9.6] - 2026-11-27
 
-## [1.0.0]
-- Versão inicial: projetos, passos, auto-save, progresso, Room offline-first, sync com Google Drive e auto-update via GitHub Releases.
+### Corrigido
+- **Erro de compilação em `AppDrawerScreen.kt`:** substituído `Icons.Filled.Public` por `Icons.Filled.Search` (ícone garantido em `material-icons-core`), eliminando `Unresolved reference: Public`.
+- **Workflow CI:** migrado `actions/setup-java@v4` para `actions/setup-java@v5` em `.github/workflows/build.yml`.
 
----
+## [1.9.5] - 2026-11-27
 
-## Política de versionamento
+### Corrigido
+- **Imports em `AppDrawerScreen.kt`:** restaurados `androidx.compose.foundation.lazy.LazyRow` e `androidx.compose.foundation.lazy.items` e removida referência residual a `Icons.Filled.Language`.
 
-| O que mudou | Ação |
-|---|---|
-| Correção de bug | `PATCH` (1.1.0 → 1.1.1) |
-| Funcionalidade nova compatível | `MINOR` (1.1.0 → 1.2.0) |
-| Mudança incompatível (formato de dados, remoção de recurso) | `MAJOR` (1.x → 2.0.0) |
-| Mudança em entidade do Room | subir `AppDatabase.version` **e** criar `Migration` (+ teste de migração) |
-| Mudança no formato do backup JSON | subir `BackupFile.schemaVersion` e tratar versões antigas |
+## [1.9.4] - 2026-11-27
 
-A cada mudança significativa: (1) atualizar `versionName`/`versionCode` em `gradle.properties`, (2) registrar no `CHANGELOG.md`, (3) `git tag vX.Y.Z && git push origin vX.Y.Z` para o CI publicar o APK assinado.
+### Corrigido
+- **Erro de compilação em `AppDrawerScreen.kt`:** corrigido o escape das aspas em `"Remover atalho "${pwa.name}"?"`, adicionados os imports de `clip`, `LazyRow` e `items`, e substituído `Icons.Filled.Language` por `Icons.Filled.Public` (presente em `material-icons-core`).
+
+## [1.9.3] - 2026-11-27
+
+### Adicionado
+- **Atalhos PWA com Brave, Vivaldi e Chrome:** adicionados `PwaShortcut` e `PwaPrefs` com faixa leve de atalhos na gaveta de apps, diálogo para cadastrar nome/URL/navegador (`Brave`, `Vivaldi` ou `Chrome`), filtragem na busca e abertura direta no navegador escolhido sem embutir `WebView` no launcher.
+
+## [1.9.2] - 2026-11-27
+
+### Adicionado
+- **Dados do app no menu de abas da gaveta:** incluída a ação **Dados do app** dentro do diálogo de seleção de abas (`SpaceAssignmentDialog`), abrindo `Settings.ACTION_APPLICATION_DETAILS_SETTINGS` para o pacote selecionado sem adicionar botão de desinstalação direta.
+
+## [1.9.1] - 2026-11-26
+
+### Adicionado e Corrigido
+- **Aba retrátil para configurações na Home:** substituído o ícone fixo de engrenagem por uma aba compacta na borda esquerda (`SlidingSettingsHandle`) que se expande ao toque para revelar o botão da engrenagem e o painel de cores/aparência.
+- **Limpeza automática da busca na Gaveta ao abrir app:** ao pesquisar um aplicativo na grade ou lista da gaveta e clicar para abri-lo, o campo de busca é limpo imediatamente para exibir todos os apps ao retornar.
+- **Publicação automática de Releases no GitHub:** ajustado `.github/workflows/build.yml` com `target_commitish`, `draft: false`, `make_latest: true` e anexação automática dos APKs de release e debug em todo `push` ou execução manual.
+
+## [1.9.0] - 2026-11-26
+
+### Adicionado
+- **Notificação em destaque visual abaixo do relógio:** `NotificationSummaryRow` agora exibe um cartão compacto com barra lateral e borda na cor de destaque (`primary`), ícone em badge e ponto indicador, destacando o alerta visualmente sem usar animações contínuas ou camadas extras na GPU.
+- **Tamanho ajustável na engrenagem:** adicionada seleção de escala (`P`, `M`, `G`, `GG`) no painel de aparência com persistência em `AppPrefs` (`notification_scale`).
+
+## [1.8.1] - 2026-11-26
+
+### Corrigido
+- Adicionado `import androidx.compose.foundation.layout.Spacer` e passados `backgroundColor` e `onBackgroundColorChange` para `AppearancePanel` em `HomeScreen.kt`.
+- Configurada publicação automática da Release na aba Releases do GitHub a cada `push` na branch principal via `.github/workflows/build.yml`.
+
+## [1.8.0] - 2026-11-26
+
+### Adicionado
+- **Seletor moderno de cor de fundo e cor de destaque:** `ColorPickerDialog` agora permite escolher cor de destaque ou cor de fundo com campo 2D de saturação/brilho + barra de matiz + swatches rápidos + exibição em HEX, persistindo ambas em `AppPrefs` e ajustando automaticamente contraste e superfícies em `FeatherTheme`.
+
+## [1.7.0] - 2026-11-26
+
+### Adicionado
+- **Auto-update via GitHub Releases:** o launcher consulta `/releases/latest` do repositório no GitHub ao abrir/voltar ao primeiro plano (com intervalo mínimo de 15 minutos entre checagens), exibe um popup (`AppUpdateDialog`) quando há tag mais recente que `BuildConfig.VERSION_NAME`, baixa o APK com barra de progresso em `cacheDir/updates/` e aciona o instalador de pacotes do Android via `FileProvider`.
+- **Publicação automática de Release no CI:** ao realizar commit/push nas branches principais, o workflow `.github/workflows/build.yml` lê `appVersionName` do `app/build.gradle.kts`, cria/atualiza a tag `vX.Y.Z` e anexa o `Feather-vX.Y.Z-release.apk` como GitHub Release oficial.
+
+## [1.6.1] - 2026-09-25
+
+Continuação da auditoria: P2 (recomposição excessiva) e P8 (itens
+menores de performance/limpeza).
+
+### Corrigido
+- **Recomposição excessiva (P2):** sem Kotlin 2.0 (que traz "strong
+  skipping" por padrão), o compilador do Compose trata qualquer
+  `List`/`Map`/`Set` puro do Kotlin como instável — qualquer composable
+  que recebe esses tipos como parâmetro nunca pula recomposição, mesmo
+  que o conteúdo não tenha mudado. Cada notificação postada recompunha
+  Home, Gaveta e Widgets inteiras. Convertidos os StateFlow expostos
+  pelo ViewModel (`filteredApps`, `spaces`, `currentSpaceApps`,
+  `assignments`, `appsWithNotifications`, `widgetPlacements`) e as
+  assinaturas dos composables que os recebem para
+  `PersistentList`/`PersistentSet`/`PersistentMap`
+  (`kotlinx.collections.immutable`) — reconhecidos como estáveis pelo
+  compilador mesmo sem strong skipping, e mantendo os operadores
+  `+`/`-`/`put` que o código já usava. Optamos por essa rota em vez de
+  migrar o projeto inteiro para Kotlin 2.0, mais arriscado sem
+  conseguir compilar localmente para validar.
+- `collectAsState()` trocado por `collectAsStateWithLifecycle()` em
+  todas as coletas de `StateFlow` no `MainActivity` — a coleta (e a
+  recomposição que ela pode disparar) agora pausa sozinha quando a
+  Activity não está em primeiro plano. A dependência já estava no
+  projeto (`lifecycle-runtime-compose`), só não era usada.
+- **Relógio (#9, ainda pendente da auditoria original + P8):** o loop
+  de `delay()` foi trocado por um `BroadcastReceiver` ouvindo
+  `ACTION_TIME_TICK`/`ACTION_TIME_CHANGED`/`ACTION_TIMEZONE_CHANGED`,
+  registrado só enquanto a Activity está em primeiro plano
+  (ON_START/ON_STOP). Corrige o atraso de até 1 minuto que podia
+  acontecer ao acordar a tela (`delay()` usa tempo de execução, que não
+  avança durante o sono profundo) e o loop rodando à toa em segundo
+  plano. Também passou a respeitar a preferência de 12h/24h do sistema
+  em vez de fixar "HH:mm".
+- (P8) `getSpaces()` era chamado duas vezes no construtor do
+  `LauncherViewModel`, lendo e fazendo parsing das prefs em dobro à toa.
+- (P8) Removida a regra `-keep class com.feather.launcher.data.** { *; }`
+  do ProGuard — não há reflexão usando essas classes em lugar nenhum do
+  projeto, então ela só impedia o R8 de otimizar esse pacote sem
+  nenhum ganho real.
+
+### Adicionado
+- Dependência `org.jetbrains.kotlinx:kotlinx-collections-immutable`.
+
+## [1.6.0] - 2026-09-19
+
+Continuação da rodada de correções da auditoria: segurança da
+assinatura de release (#6) e lambdas travadas/acessibilidade (#10).
+
+### Adicionado
+- Assinatura de release configurável via variáveis de ambiente
+  (`RELEASE_STORE_FILE`/`RELEASE_STORE_PASSWORD`/`RELEASE_KEY_ALIAS`/
+  `RELEASE_KEY_PASSWORD`), lidas pelo CI a partir de GitHub Secrets. Ver
+  `RELEASING.md` para o passo a passo de configuração. Sem os secrets
+  configurados, o release continua caindo de volta pra chave de debug
+  (build não quebra, só não fica assinado com a chave de verdade).
+
+### Corrigido
+- **Segurança (#6):** o release era assinado com a mesma chave de
+  debug, versionada no repositório com senha pública. Num repositório
+  público com CI publicando o release automaticamente, isso permitia
+  que qualquer pessoa assinasse um APK malicioso com a mesma
+  assinatura e o Android aceitasse como "atualização" — grave,
+  considerando que o app pede Acesso a Notificações. Gerada uma chave
+  de release de verdade (fora do repositório, entregue separadamente).
+- **Lambdas "congeladas" (#10):** `pointerInput(key) { detectTapGestures(...) }`
+  só reinicia sua coroutine quando a `key` muda. Em `SpaceTabsRow`, a
+  key era `space.id` (não muda ao renomear) — renomear uma aba e tocar
+  segurar nela de novo abria o diálogo com o nome ANTIGO pré-preenchido.
+  O mesmo padrão existia (com impacto menor) em `AppTile`, `AppRow` e
+  `AppGridTile`. Trocado por `Modifier.combinedClickable`, que lê
+  `onClick`/`onLongClick` sempre atualizados a cada recomposição.
+- **Acessibilidade (#10):** `detectTapGestures` não gera nenhuma
+  semântica de clique — o TalkBack não conseguia abrir nenhum app por
+  esta launcher. `combinedClickable` expõe a ação corretamente para
+  leitores de tela, nos mesmos pontos acima e no seletor de widgets
+  (`WidgetProviderRow`, agora com `clickable` simples).
+- (P6, de brinde) `BitmapPainter(...)` recriado a cada recomposição
+  trocado por `Image(bitmap = ...)` nos mesmos pontos; removido um
+  `.background(Color.Transparent)` sem efeito em `AppTile`.
+
+## [1.5.0] - 2026-09-19
+
+Correções a partir de uma auditoria completa do código (gerada por um
+agente auditor separado, verificada manualmente contra o código real
+antes de aplicar qualquer coisa). Cobre os 4 problemas de maior
+prioridade apontados: um crash provável, widgets trocando de lugar, a
+lista de apps nunca atualizando, e o jank mais perceptível da lista.
+Inclui também a correção do "voltar fecha o launcher", confirmada em
+uso real.
+
+### Adicionado
+- A lista de apps agora se atualiza sozinha ao instalar, desinstalar ou
+  atualizar um app, via `LauncherApps.Callback` (com um pequeno
+  debounce, já que uma atualização de app costuma disparar mais de um
+  evento em sequência). Até aqui, a lista só recarregava reiniciando o
+  processo do launcher inteiro.
+- Vínculos de apps por Space para pacotes desinstalados são limpos
+  automaticamente a cada atualização da lista, em vez de acumular
+  indefinidamente nas prefs.
+
+### Corrigido
+- **Crash por chave duplicada na Gaveta:** `AppListView` e `AppGridView`
+  usavam `packageName` como key; um pacote com mais de uma activity
+  LAUNCHER (comum em algumas ROMs e em apps do Google/Samsung) gerava
+  duas entradas com a mesma key, e o Compose lança
+  `IllegalArgumentException`. Trocado para `app.key`
+  (`packageName + activityName`), que já era usado corretamente na Home.
+- **Widgets trocando de lugar ao remover/redimensionar:** a grade
+  manual de widgets (`WidgetsGrid`) não envolvia cada item em `key()`.
+  Sem isso, o Compose identifica cada `WidgetCard` pela posição na
+  árvore, não pelo widget que ele representa — ao remover o widget A,
+  o slot dele passava a receber os dados do widget B, mas o
+  `AndroidView` (cuja `factory` só roda uma vez por slot) continuava
+  mostrando a view de A. Resultado: os botões de ação podiam agir no
+  widget errado.
+- **"Voltar" fechando o launcher na Home:** o `BackHandler` ficava
+  desligado na Home, deixando o botão "voltar" cair no comportamento
+  padrão do sistema — que, numa Activity HOME com `launchMode
+  singleTask`, encerra a Activity, e o Android a recria na hora (por
+  ser a launcher padrão). Na prática: a tela pisca e a grade de apps é
+  reconstruída do zero. Confirmado em uso real. Agora o `BackHandler`
+  fica sempre ativo; na Home, simplesmente não faz nada.
+- **Painel de Widgets recriado a cada visita:** com
+  `beyondViewportPageCount = 0` no `HorizontalPager`, a página de
+  Widgets era descartada por inteiro sempre que não estava visível —
+  cada volta reinflava todos os `AppWidgetHostView` do zero. Esse é o
+  mesmo tipo de problema que uma correção anterior (grade não-lazy, ver
+  v1.4.0) já tinha resolvido, só que dentro do painel; faltava resolver
+  também na troca de página. Agora Widgets e Home ficam sempre
+  compostas (a Gaveta, mais pesada, continua sendo descartada quando
+  não está visível — é a página com a lista completa de apps, e menos
+  visitada a partir de Widgets diretamente).
+
+## [1.4.4] - 2026-09-18
+
+**Reversão** das duas mudanças da v1.4.3, que pioraram o app em teste
+real: o widget da agenda continuou estático (nenhum ganho) e o botão
+de "Alterar tamanho"/"Remover" parou de funcionar por completo
+(regressão clara). Como nenhuma das duas trouxe benefício confirmado,
+optamos por voltar ao comportamento da v1.4.2, que era conhecido e
+funcionava.
+
+### Revertido
+- `detectLongPress` voltou a usar `waitForUpOrCancellation()` puro
+  (sem a checagem manual de deslocamento do dedo adicionada na
+  v1.4.3), que é o que fazia o toque-e-segure funcionar. A checagem de
+  deslocamento tinha um bug não identificado que impedia o long-press
+  de disparar.
+- Removida a `NestedScrollInteropConnection` do painel de Widgets — não
+  fez a lista da agenda do Google Calendar rolar, então ficou só como
+  risco sem benefício.
+
+### Conhecido
+- O diálogo de ações do widget ainda pode abrir, ocasionalmente, se um
+  swipe entre as abas Widgets ↔ Home começar bem dentro do cantinho de
+  40dp (v1.4.2) — não resolvido nesta versão; qualquer tentativa de
+  correção precisa ser testada com cuidado antes de substituir o que já
+  funciona.
+- Listas nativas dentro de widgets (ex.: agenda do Google Calendar)
+  continuam sem rolar dentro do painel de Widgets — sem solução
+  identificada até o momento.
+
+## [1.4.3] - 2026-09-18
+
+Segunda camada de proteção para o mesmo problema do diálogo de ações
+do widget abrindo durante o swipe entre páginas (v1.4.2), mais uma
+correção de compatibilidade de rolagem dentro de widgets nativos.
+
+### Corrigido
+- O detector de toque e segure na faixa do widget (v1.4.1/v1.4.2) não
+  cancelava a detecção quando o dedo se movia — só parava ao soltar ou
+  ao estourar o tempo. Isso deixava uma brecha residual mesmo com a
+  área já restrita a um cantinho (v1.4.2): se o arrasto entre páginas
+  começasse bem ali, o diálogo ainda podia abrir. Agora o detector
+  cancela assim que o deslocamento ultrapassa `touchSlop`, do mesmo
+  jeito que o `detectTapGestures` do próprio Compose já faz.
+- Widgets com listas roláveis nativas (ex.: a agenda do Google
+  Calendar) não conseguiam rolar dentro do próprio widget — o
+  `verticalScroll` do painel de Widgets "vencia" qualquer arrasto
+  vertical antes da lista nativa ter chance de rolar sozinha.
+  Adicionado `rememberNestedScrollInteropConnection()`
+  (`androidx.compose.ui.platform`), a ponte oficial do Compose para
+  este tipo de conflito. **Ressalva:** essa ponte foi desenhada
+  principalmente para Views que implementam o protocolo moderno de
+  nested scrolling (`RecyclerView`, `NestedScrollView`); não há
+  confirmação de que a `ListView` clássica usada por widgets de coleção
+  (como o da Agenda) participa desse protocolo — o efeito real precisa
+  ser validado em aparelho. Se não resolver, o próximo passo é uma
+  abordagem estrutural diferente para o scroll do painel de Widgets.
+
+## [1.4.2] - 2026-09-18
+
+Segunda correção no diálogo de ações do widget (v1.4.1), reportada em
+uso real ao transitar entre as abas de Widgets e Home.
+
+### Corrigido
+- A faixa de toque e segure no topo do widget (v1.4.1) ocupava a
+  largura inteira do card. Como o gesto de arrastar da aba de Widgets
+  para a Home desliza horizontalmente bem em cima dela, às vezes o
+  diálogo de "Alterar tamanho"/"Remover" abria no meio da transição
+  entre páginas. A área sensível agora fica só num cantinho fixo (40dp)
+  no canto esquerdo da faixa, longe do caminho natural do dedo ao
+  deslizar entre as abas.
+
+## [1.4.1] - 2026-09-18
+
+Correção de comportamento no diálogo de ações do widget (v1.4.0),
+reportada em uso real com um widget de controle de ponto.
+
+### Corrigido
+- Toque e segure para abrir "Alterar tamanho"/"Remover" disparava por
+  engano ao interagir normalmente com o widget (ex.: segurar um botão
+  de "bater ponto" por tempo suficiente para o app processar a ação).
+  A área sensível ao toque longo agora é uma faixa dedicada e visível
+  no topo do card, separada do conteúdo do widget — o resto do card
+  (onde ficam os botões reais do widget) não tem mais nenhuma detecção
+  de toque longo por cima.
+- Tempo de toque e segure aumentado (~600ms, um pouco acima do padrão
+  do sistema) como margem extra.
+
+## [1.4.0] - 2026-09-18
+
+Leva de ajustes de usabilidade na aba de Widgets e na Home, a partir de
+feedback de uso real do app.
+
+### Adicionado
+- Diálogo de ações ao tocar e segurar um widget já adicionado ("Alterar
+  tamanho" / "Remover"), substituindo a antiga barra fixa com texto
+  "Tamanho" e botão de fechar — o widget ocupa toda a área do card agora.
+- No seletor de widgets: resumo curto (2ª linha) para diferenciar
+  widgets do mesmo app (usa a descrição declarada pelo provider no
+  Android 12+, com o tamanho sugerido como alternativa em versões
+  anteriores), e os widgets passaram a ser agrupados por app, com um
+  cabeçalho por grupo.
+- Ponto de notificação nos ícones dos apps na Home, para qualquer app
+  com notificação ativa no momento (antes só existia o resumo da
+  última notificação, sem indicação nos ícones).
+- Segunda linha no resumo de notificação da Home: o corpo da
+  notificação agora aparece por inteiro (sem cortar com "..."),
+  separado da linha com app + título.
+
+### Alterado
+- Botão de aparência (engrenagem) movido do lado direito para o
+  esquerdo da barra superior da Home — mais longe do apoio natural do
+  polegar, reduzindo toques acidentais.
+- Relógio da Home reaproximado do topo (padding reduzido), compensando
+  o espaço extra da segunda linha de notificação.
+- Botão "+" de nova aba, na Home, agora alinhado verticalmente ao
+  centro com o texto das abas (`Dia a dia`, `Trabalho` etc.).
+
+### Removido
+- Linha "Usados recentemente" da Home, incluindo o rastreamento que só
+  existia para alimentá-la (`AppPrefs`/`LauncherViewModel`).
+
+## [1.3.0] - 2026-09-17
+
+### Adicionado
+- Alternância entre lista e grade na Gaveta de apps, com ícone dinâmico
+  dentro do próprio campo de busca (mostra sempre o modo *para o qual*
+  o toque leva). A escolha é lembrada entre sessões.
+
+## [1.2.0] - 2026-09-17
+
+Versão de referência que reúne a renomeação completa do projeto e a
+primeira rodada de correções de fluidez, motivada pela comparação com
+a launcher AOSP (Quickstep) original do aparelho de testes.
+
+### Alterado
+- Renomeação completa de "Aviate Lite" para **Feather Launcher**: pacote
+  (`com.aviatelite.launcher` → `com.feather.launcher`), nome do app,
+  classes de tema/notificação, nome do projeto raiz e nome do APK gerado.
+- CI (`build.yml`) passou a gerar também o APK de **release**
+  (minificado, sem `debuggable`), além do de debug — necessário para
+  avaliar fluidez de forma justa.
+- Painel de widgets: `LazyVerticalGrid` trocado por uma grade não-lazy,
+  evitando que o `AppWidgetHost` recriasse os widgets nativos a cada
+  rolagem.
+- Home: removidas as camadas de fade (`AnimatedVisibility`) do resumo
+  de notificação e do painel de aparência, reduzindo overdraw na GPU
+  do aparelho de testes.
+
+### Adicionado
+- Infraestrutura para Baseline Profile (`androidx.profileinstaller`) —
+  o arquivo `baseline-prof.txt` em si ainda precisa ser gerado via
+  Macrobenchmark num aparelho físico.
+- Gatilhos de `pull_request` e execução manual (`workflow_dispatch`) no CI.
+- README reescrito do zero, com o real estado do código documentado.
+
+### Removido
+- Texto "toque e segure para remover" nos cards de widget (a ação já
+  tinha um botão explícito).
+- Dependência não utilizada do Coil (`io.coil-kt:coil-compose`).
+- Dependência órfã do `androidx.compose.animation:animation`, sem mais
+  uso após a remoção dos fades acima.

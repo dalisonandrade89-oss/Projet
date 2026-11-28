@@ -1,4 +1,7 @@
 <resources>
-    <!-- Tema base da janela; o visual real vem do Compose (Material 3 + Dynamic Color) -->
-    <style name="Theme.Projet" parent="android:Theme.Material.Light.NoActionBar" />
+    <style name="Theme.Feather" parent="android:Theme.Material.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@android:color/black</item>
+    </style>
 </resources>
